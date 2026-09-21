@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#08090d" />
+  <meta name="description" content="AFX Regex Tester — a fast, interactive regular expression playground with live matching, replace mode, presets, history, and a built-in cheat sheet." />
+  <title>AFX Regex Tester</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="glow glow-one" aria-hidden="true"></div>
+  <div class="glow glow-two" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="AFX Regex Tester home">
+      <span class="brand-mark">AFX</span>
+      <span class="brand-name">Regex Tester</span>
+    </a>
+    <nav class="top-actions">
+      <button class="ghost-btn" id="clearBtn" type="button">Clear</button>
+      <button class="ghost-btn" id="shareBtn" type="button">Copy Share Link</button>
+      <a class="primary-btn compact" href="https://github.com/arfanshaik/AFX-Regex-Tester" target="_blank" rel="noreferrer">GitHub</a>
+    </nav>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <div class="eyebrow"><span class="status-dot"></span> AFX Developer Utility</div>
+        <h1>Test regular expressions <span>without breaking your flow.</span></h1>
+        <p>Write a pattern, paste your sample text, and see matches, groups, replacements, and errors instantly.</p>
+      </div>
+      <div class="hero-stat-grid" aria-label="regex tester features">
+        <div class="hero-stat"><strong>LIVE</strong><span>match engine</span></div>
+        <div class="hero-stat"><strong>8</strong><span>JS flags</span></div>
+        <div class="hero-stat"><strong>0ms</strong><span>server latency</span></div>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <div class="main-column">
+        <article class="panel regex-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="section-kicker">PATTERN</span>
+              <h2>Regular expression</h2>
+            </div>
+            <div class="toolbar-row">
+              <button class="icon-btn" id="copyRegexBtn" type="button" title="Copy regex">Copy</button>
+              <button class="icon-btn" id="savePresetBtn" type="button" title="Save to history">Save</button>
+            </div>
+          </div>
+
+          <div class="regex-editor" id="regexEditorWrap">
+            <span class="slash">/</span>
+            <input id="regexInput" type="text" value="\\b[A-Z][a-z]+\\b" autocomplete="off" spellcheck="false" aria-label="Regular expression pattern" />
+            <span class="slash">/</span>
+            <span class="flag-summary" id="flagSummary">g</span>
+          </div>
+          <div id="regexError" class="error-message" role="status"></div>
+
+          <div class="flag-grid" aria-label="regular expression flags">
+            <label class="flag-chip active"><input type="checkbox" value="g" checked><span>g</span><small>global</small></label>
+            <label class="flag-chip"><input type="checkbox" value="i"><span>i</span><small>ignore case</small></label>
+            <label class="flag-chip"><input type="checkbox" value="m"><span>m</span><small>multiline</small></label>
+            <label class="flag-chip"><input type="checkbox" value="s"><span>s</span><small>dot all</small></label>
+            <label class="flag-chip"><input type="checkbox" value="u"><span>u</span><small>unicode</small></label>
+            <label class="flag-chip"><input type="checkbox" value="y"><span>y</span><small>sticky</small></label>
+            <label class="flag-chip"><input type="checkbox" value="d"><span>d</span><small>indices</small></label>
+            <label class="flag-chip"><input type="checkbox" value="v"><span>v</span><small>unicode sets</small></label>
+          </div>
+        </article>
+
+        <article class="panel test-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="section-kicker">INPUT</span>
+              <h2>Test string</h2>
+            </div>
+            <div class="live-indicator"><span></span> Live</div>
+          </div>
+
+          <div class="editor-stack">
+            <textarea id="testInput" spellcheck="false" aria-label="Text to test">Arfan is building AFX Regex Tester. JavaScript makes Regex experiments fast.
+Try names like Rahul, Priya, Hyderabad and AFX.</textarea>
+            <pre id="highlightLayer" aria-hidden="true"></pre>
+          </div>
+
+          <div class="result-strip">
+            <div><strong id="matchCount">0</strong><span>matches</span></div>
+            <div><strong id="groupCount">0</strong><span>groups</span></div>
+            <div><strong id="charCount">0</strong><span>characters</span></div>
+            <div><strong id="runTime">0.00</strong><span>ms</span></div>
+          </div>
+        </article>
+
+        <article class="panel replace-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="section-kicker">REPLACE</span>
+              <h2>Replacement preview</h2>
+            </div>
+            <button class="toggle-btn" id="replaceToggle" type="button" aria-pressed="true"><span></span> Enabled</button>
+          </div>
+          <input class="replacement-input" id="replacementInput" value="[$&]" placeholder="Replacement, e.g. $1" spellcheck="false" />
+          <div class="replacement-preview" id="replacementPreview"></div>
+        </article>
+      </div>
+
+      <aside class="side-column">
+        <article class="panel side-panel">
+          <div class="panel-heading mini">
+            <div>
+              <span class="section-kicker">MATCHES</span>
+              <h2>Match inspector</h2>
+            </div>
+          </div>
+          <div id="matchesList" class="matches-list"></div>
+        </article>
+
+        <article class="panel side-panel">
+          <div class="panel-heading mini">
+            <div>
+              <span class="section-kicker">PRESETS</span>
+              <h2>Quick patterns</h2>
+            </div>
+          </div>
+          <div class="preset-list" id="presetList"></div>
+        </article>
+
+        <article class="panel side-panel">
+          <div class="panel-heading mini">
+            <div>
+              <span class="section-kicker">HISTORY</span>
+              <h2>Recent patterns</h2>
+            </div>
+            <button class="text-btn" id="clearHistoryBtn" type="button">Clear</button>
+          </div>
+          <div id="historyList" class="history-list"></div>
+        </article>
+      </aside>
+    </section>
+
+    <section class="cheatsheet panel">
+      <div class="panel-heading">
+        <div>
+          <span class="section-kicker">REFERENCE</span>
+          <h2>Regex cheat sheet</h2>
+        </div>
+        <span class="shortcut-hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> Save pattern</span>
+      </div>
+      <div class="cheat-grid">
+        <div><code>.</code><span>Any character</span></div>
+        <div><code>\d</code><span>Digit</span></div>
+        <div><code>\w</code><span>Word character</span></div>
+        <div><code>\s</code><span>Whitespace</span></div>
+        <div><code>^</code><span>Start of string/line</span></div>
+        <div><code>$</code><span>End of string/line</span></div>
+        <div><code>[abc]</code><span>Character set</span></div>
+        <div><code>[^abc]</code><span>Negated set</span></div>
+        <div><code>(...)</code><span>Capture group</span></div>
+        <div><code>(?:...)</code><span>Non-capture group</span></div>
+        <div><code>a|b</code><span>Alternation</span></div>
+        <div><code>* + ?</code><span>Quantifiers</span></div>
+        <div><code>{2,4}</code><span>Range quantifier</span></div>
+        <div><code>\b</code><span>Word boundary</span></div>
+        <div><code>(?=...)</code><span>Positive lookahead</span></div>
+        <div><code>(?!...)</code><span>Negative lookahead</span></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">Copied</div>
+
+  <footer>
+    <span>AFX Regex Tester</span>
+    <p>Built with HTML, CSS & vanilla JavaScript. Everything runs locally in your browser.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
