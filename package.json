@@ -1,0 +1,24 @@
+{
+  "name": "afx-regex-tester",
+  "version": "1.0.0",
+  "description": "A fast JavaScript regular expression playground with live matching, capture groups, replacement preview, presets and local history.",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "test": "node tests/regex-engine.test.js",
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "javascript",
+    "regex",
+    "regexp",
+    "developer-tools",
+    "regex-tester",
+    "frontend"
+  ],
+  "author": "Shaik Arfan",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}
