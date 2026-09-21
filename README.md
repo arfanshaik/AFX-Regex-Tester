@@ -40,7 +40,6 @@ AFX-Regex-Tester/
 ├── index.html
 ├── styles.css
 ├── app.js
-├── favicon.svg
 ├── netlify.toml
 ├── .gitignore
 ├── LICENSE
