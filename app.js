@@ -1,3 +1,14 @@
+import {
+  collectMatches,
+  countCaptureGroups,
+  createRegex,
+  createShareUrl,
+  escapeHtml,
+  getPresetLibrary,
+  parseShareState,
+  replaceMatches
+} from './src/regex-engine.js';
+
 const regexInput = document.getElementById('regexInput');
 const testInput = document.getElementById('testInput');
 const highlightLayer = document.getElementById('highlightLayer');
@@ -19,21 +30,7 @@ const toast = document.getElementById('toast');
 let replaceEnabled = true;
 let toastTimer;
 
-const presets = [
-  { name: 'Email', pattern: '[\\w.-]+@[\\w.-]+\\.[A-Za-z]{2,}', flags: 'gi', sample: 'Contact arfan@example.com or hello@afx.dev for details.' },
-  { name: 'URL', pattern: 'https?:\\/\\/[^\\s]+', flags: 'gi', sample: 'Visit https://github.com and https://example.com/docs today.' },
-  { name: 'IPv4', pattern: '\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b', flags: 'g', sample: 'Router: 192.168.1.1  Server: 10.0.0.25' },
-  { name: 'Hex color', pattern: '#(?:[0-9a-fA-F]{3}){1,2}\\b', flags: 'g', sample: 'Colors: #fff, #FF3448 and #0a0b0c.' },
-  { name: 'Phone', pattern: '\\+?\\d[\\d\\s()-]{7,}\\d', flags: 'g', sample: 'Call +91 98765 43210 or (040) 1234 5678.' },
-  { name: 'Date', pattern: '\\b\\d{2}[\\/-]\\d{2}[\\/-]\\d{4}\\b', flags: 'g', sample: 'Hackathon dates: 21/09/2026 and 22-09-2026.' },
-  { name: 'HTML tag', pattern: '<([A-Za-z][A-Za-z0-9]*)\\b[^>]*>.*?<\\/\\1>', flags: 'gis', sample: '<p>Hello AFX</p> <div>Regex Tester</div>' },
-  { name: 'Hashtag', pattern: '#[A-Za-z0-9_]+', flags: 'g', sample: '#JavaScript #Regex #AFXDeveloper' }
-];
-
-const escapeHtml = (value) => value
-  .replaceAll('&', '&amp;')
-  .replaceAll('<', '&lt;')
-  .replaceAll('>', '&gt;');
+const presets = getPresetLibrary();
 
 function getFlags() {
   return [...document.querySelectorAll('.flag-chip input:checked')].map(input => input.value).join('');
@@ -48,27 +45,7 @@ function setFlags(flags) {
 }
 
 function buildRegex(forceGlobal = false) {
-  const flags = getFlags();
-  const finalFlags = forceGlobal && !flags.includes('g') && !flags.includes('y') ? flags + 'g' : flags;
-  return new RegExp(regexInput.value, finalFlags);
-}
-
-function collectMatches(regex, text) {
-  const matches = [];
-  if (!regex.global && !regex.sticky) {
-    const match = regex.exec(text);
-    if (match) matches.push(match);
-    return matches;
-  }
-
-  let match;
-  let safety = 0;
-  while ((match = regex.exec(text)) !== null && safety < 5000) {
-    matches.push(match);
-    safety += 1;
-    if (match[0] === '') regex.lastIndex += 1;
-  }
-  return matches;
+  return createRegex(regexInput.value, getFlags(), { forceGlobal });
 }
 
 function highlightMatches(text, matches) {
@@ -124,7 +101,7 @@ function updateReplacement(regex, text) {
     replacementPreview.textContent = 'Replacement preview is disabled.';
     return;
   }
-  replacementPreview.textContent = text.replace(regex, replacementInput.value);
+  replacementPreview.textContent = replaceMatches(text, regex, replacementInput.value);
 }
 
 function updateTester() {
@@ -141,7 +118,7 @@ function updateTester() {
     highlightMatches(text, matches);
     renderMatches(matches);
     matchCount.textContent = matches.length.toLocaleString();
-    const totalGroups = matches.reduce((sum, match) => sum + Math.max(0, match.length - 1), 0);
+    const totalGroups = countCaptureGroups(matches);
     groupCount.textContent = totalGroups.toLocaleString();
     updateReplacement(regex, text);
   } catch (error) {
@@ -210,12 +187,13 @@ function saveHistory() {
 }
 
 function loadStateFromUrl() {
-  const params = new URLSearchParams(location.search);
-  if (!params.has('p')) return;
-  regexInput.value = params.get('p') || '';
-  setFlags(params.get('f') || 'g');
-  if (params.has('t')) testInput.value = params.get('t');
-  if (params.has('r')) replacementInput.value = params.get('r');
+  const state = parseShareState(location.href);
+  if (!state) return;
+
+  regexInput.value = state.pattern;
+  setFlags(state.flags);
+  if (state.test !== undefined) testInput.value = state.test;
+  if (state.replacement !== undefined) replacementInput.value = state.replacement;
 }
 
 function showToast(message) {
@@ -286,13 +264,14 @@ document.getElementById('clearBtn').addEventListener('click', () => {
 });
 
 document.getElementById('shareBtn').addEventListener('click', () => {
-  const url = new URL(location.href);
-  url.search = '';
-  url.searchParams.set('p', regexInput.value);
-  url.searchParams.set('f', getFlags());
-  url.searchParams.set('t', testInput.value);
-  url.searchParams.set('r', replacementInput.value);
-  copyText(url.toString(), 'Share link copied');
+  const url = createShareUrl(location.href, {
+    pattern: regexInput.value,
+    flags: getFlags(),
+    test: testInput.value,
+    replacement: replacementInput.value
+  });
+
+  copyText(url, 'Share link copied');
 });
 
 presetList.addEventListener('click', (event) => {
