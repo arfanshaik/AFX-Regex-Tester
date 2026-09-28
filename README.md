@@ -1,3 +1,11 @@
+<p align="center">
+  <img src="assets/preview.svg" alt="AFX-Regex-Tester preview" width="100%" />
+</p>
+
+<p align="center">
+  <img src="assets/features.svg" alt="AFX-Regex-Tester features" width="100%" />
+</p>
+
 # AFX Regex Tester
 
 > A fast, modern regular-expression playground built with **vanilla JavaScript** for testing patterns, inspecting matches, experimenting with replacement strings, and learning regex without leaving the browser.
