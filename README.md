@@ -1,9 +1,5 @@
 <p align="center">
-  <img src="assets/preview.svg" alt="AFX-Regex-Tester preview" width="100%" />
-</p>
-
-<p align="center">
-  <img src="assets/features.svg" alt="AFX-Regex-Tester features" width="100%" />
+  <img src="assets/website-preview.svg" alt="AFX Regex Tester website preview" width="100%" />
 </p>
 
 # AFX Regex Tester
